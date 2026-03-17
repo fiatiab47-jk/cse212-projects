@@ -1,4 +1,6 @@
-﻿public class DuplicateCounter
+﻿using System.Runtime.InteropServices.Marshalling;
+
+public class DuplicateCounter
 {
     //Count how many duplicates are in a collection of data.
 
@@ -20,11 +22,33 @@
 
         Console.WriteLine($"Number of items in the collection: {data.Length}");
         Console.WriteLine($"Number of duplicates : {CountDuplicates(data)}");
+        Console.WriteLine($"Number of duplicates (alternate): {CountDuplicatesAlternate(data)}");
     }
 
     private static int CountDuplicates(int[] data)
     {
         // Add code here.
-        return 0;
+        var unique = new HashSet<int>();
+        var duplicates = new HashSet<int>();
+
+        foreach (var num in data)
+        {
+            if (unique.Contains(num))
+                duplicates.Add(num);
+            else
+                unique.Add(num);
+        }
+        return duplicates.Count;
+    }
+
+    /// <summary>
+    /// Alternative solution
+    /// Add everything in the data to the set. Duplicates will be automatically ignored.
+    /// Subtract the length of the set from the length of the data.
+    /// </summary>
+    private static int CountDuplicatesAlternate(int[] data)
+    {
+        var unique = new HashSet<int>(data);
+        return data.Length - unique.Count;
     }
 }
