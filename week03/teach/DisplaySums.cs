@@ -29,5 +29,19 @@
     /// <param name="numbers">array of integers</param>
     private static void DisplaySumPairs(int[] numbers) {
         // TODO Problem 2 - This should print pairs of numbers in the given array
+        var valuesSeen = new HashSet<int>();
+        foreach(var n in numbers)
+        {
+            // Compliment is the number that adds to another number in the array to sum up to 10
+            int complement = 10 - n;
+            // Checks if set already contains a compliment
+            // Print the two numbers to sum up 10 if compliment is found 
+            if (valuesSeen.Contains(complement))
+            {
+                Console.WriteLine($"{n} {complement}");
+            }
+            // Adds number set if not found in the set (valueSeen)
+            valuesSeen.Add(n);
+        }
     }
 }
