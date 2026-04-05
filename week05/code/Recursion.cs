@@ -15,7 +15,20 @@ public static class Recursion
     public static int SumSquaresRecursive(int n)
     {
         // TODO Start Problem 1
-        return 0;
+        // Base Case: If n is 0 or negative, there is nothing to add.
+        // This stops the recursion form going on forever.
+        if (n <= 0)
+        {
+            return 0;
+        }
+        else
+        {
+            // Recursive Case: 
+            // The square of the current number (n*n) plus the sum of 
+            // all numbers before it (n - 1). We reduce the problem by each call.
+            // moving toward the base case. 
+            return n*n + SumSquaresRecursive(n - 1);
+        }
     }
 
     /// <summary>
@@ -40,6 +53,30 @@ public static class Recursion
     public static void PermutationsChoose(List<string> results, string letters, int size, string word = "")
     {
         // TODO Start Problem 2
+        // Base Case:
+        // When size reaches 0, we have picked enough letters.
+        // The current word is a complete permutation, add it to results.
+        if (size == 0)
+        {
+            results.Add(word);
+            // Stop recursion for this branch
+            return;
+        }
+
+        // Recursive Case
+        // Try every letter still available as the next character.
+        for (int i = 0; i < letters.Length; i++)
+        {
+            // Pick the current letter at index i
+            char chosenLetter = letters[i];
+
+            // Remove chosen letter from the available pool at index 'i' so it  cannot be 
+            // reused in this permutation. (1 = remove only one character)
+            string remainingLetters = letters.Remove(i, 1);
+
+            // Recurse; grow the word by chosen letter, shrink size by 1.
+            PermutationsChoose(results, remainingLetters, size - 1, word + chosenLetter);
+        }
     }
 
     /// <summary>
@@ -98,8 +135,23 @@ public static class Recursion
 
         // TODO Start Problem 3
 
+        // Initialize the dictionary if this is the first call
+        remember ??= new Dictionary<int, decimal>();
+
+        // Memoization check:
+        // If we already calculated ways for this value of s, 
+        // return it immediately instead of calculating 
+        if (remember.ContainsKey(s))
+            return remember[s];
+
+
         // Solve using recursion
-        decimal ways = CountWaysToClimb(s - 1) + CountWaysToClimb(s - 2) + CountWaysToClimb(s - 3);
+        // Total ways to reach stairs s = sum of ways form 
+        // the three possible last steps (1, 2, or 3 stairs)
+        decimal ways = CountWaysToClimb(s - 1, remember) + CountWaysToClimb(s - 2, remember) + CountWaysToClimb(s - 3, remember);
+        // Memoization store:
+        // Save the result so we never recalculate this value again
+        remember[s] = ways;
         return ways;
     }
 
@@ -119,6 +171,27 @@ public static class Recursion
     public static void WildcardBinary(string pattern, List<string> results)
     {
         // TODO Start Problem 4
+
+        // Find the first wildcard in the pattern
+        int wildcardIndex = pattern.IndexOf('*');
+
+        // Base Case:
+        // No wildcard found, means the pattern is a complete binary string
+        // Add it to 
+        if (wildcardIndex == -1)
+        {
+            results.Add(pattern);
+            return;
+        }
+
+        // Recursive Case:
+        // Replace the first * with 0, then recurse to handle remaining wildcards
+        // pattern[..wildcardIndex] takes everything before *
+        // pattern[(wildcardIndex + 1)..] takes everything after the * 
+        WildcardBinary(pattern[..wildcardIndex] + "0" + pattern[(wildcardIndex + 1)..], results);
+
+        // Replace the first * with 1, then recurse to handle remaining wildcards
+        WildcardBinary(pattern[..wildcardIndex] + "1" + pattern[(wildcardIndex + 1)..], results);
     }
 
     /// <summary>
@@ -129,15 +202,44 @@ public static class Recursion
     {
         // If this is the first time running the function, then we need
         // to initialize the currPath list.
-        if (currPath == null) {
+        if (currPath == null)
+        {
             currPath = new List<ValueTuple<int, int>>();
         }
-        
+
         // currPath.Add((1,2)); // Use this syntax to add to the current path
 
         // TODO Start Problem 5
         // ADD CODE HERE
 
-        // results.Add(currPath.AsString()); // Use this to add your path to the results array keeping track of complete maze solutions when you find the solution.
-    }
+        // Recursive Case:
+        // IsValidMove handles boundary, wall and already visited 
+        // checks before we access any maze data
+        if (maze.IsValidMove(currPath, x, y))
+        {
+            // Mark current position as visited
+            currPath.Add((x, y));
+
+            // Base Case; If we reached the end, save the completed path to results
+            if (maze.IsEnd(x, y))
+            {
+                // results.Add(currPath.AsString()); // Use this to add your path to the results array keeping track of complete maze solutions when you find the solution.
+                results.Add(currPath.AsString());
+                currPath.RemoveAt(currPath.Count - 1);
+                return;
+            }
+        
+            // All 4 directions
+            SolveMaze(results, maze, x + 1, y, currPath);
+            SolveMaze(results, maze, x - 1, y, currPath);
+            SolveMaze(results, maze, x, y + 1, currPath);
+            SolveMaze(results, maze, x, y - 1, currPath);
+
+            // Backtracking:
+            // Remove current position so other branches can explore freely
+            currPath.RemoveAt(currPath.Count - 1);
+        }
+    }    
+
+
 }
